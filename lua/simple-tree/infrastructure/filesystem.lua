@@ -1,5 +1,7 @@
 local uv = vim.uv or vim.loop
 
+local M = {}
+
 local DIR = "directory"
 
 ---@alias Filetype "file" | "directory" | "link" | "fifo" | "socket" | "char" | "block" | "unknown"
@@ -65,7 +67,7 @@ local function _read_dir_async(path, root, node, callback)
   end)
 end
 
-local function read_dir_async(path, callback)
+M.read_dir_async = function (path, callback)
   ---TODO: test if path is a directory
 
   ---@type Node
@@ -77,18 +79,21 @@ local function read_dir_async(path, callback)
   }
 
   calls[root] = 1
-  _read_dir_async(path, root, root, function()
+  local errors = {}
+  _read_dir_async(path, root, root, function(_, err)
+    if err then
+        table.insert(errors, err)
+    end
+
     if calls[root] == 0 then
       calls[root] = nil
-      callback(root)
+      callback(root, #errors > 0 and errors or nil)
     end
   end)
 end
 
-read_dir_async("/home/rodrigolm/git/buffer-list", function(entries, err)
-  if (err) then
-    vim.print("ERROR: " .. err)
-  end
+M.get_cwd = function ()
+    return vim.fn.getcwd()
+end
 
-  vim.print(entries)
-end)
+return M
