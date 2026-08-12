@@ -6,13 +6,13 @@ local DIR = "directory"
 
 ---@alias Filetype "file" | "directory" | "link" | "fifo" | "socket" | "char" | "block" | "unknown"
 
----@class Node
+---@class RawNode
 ---@field type Filetype
 ---@field name string
 ---@field path string
----@field childs Node[] | nil
+---@field childs RawNode[] | nil
 
----@type table<Node, number>
+---@type table<RawNode, number>
 local calls = {}
 
 ---@param path string
@@ -22,8 +22,8 @@ local function getFilename(path)
 end
 
 ---@param path string
----@param root Node
----@param node Node
+---@param root RawNode
+---@param node RawNode
 ---@param callback fun
 local function _read_dir_async(path, root, node, callback)
 	uv.fs_scandir(path, function(err, handle)
@@ -46,7 +46,7 @@ local function _read_dir_async(path, root, node, callback)
 			local is_dir = type == DIR
 			local new_path = path .. "/" .. name
 
-			---@type Node
+			---@type RawNode
 			local child = {
 				type = type,
 				name = name,
@@ -72,7 +72,7 @@ end
 M.read_dir_async = function(path, callback)
 	---TODO: test if path is a directory
 
-	---@type Node
+	---@type RawNode
 	local root = {
 		type = DIR,
 		name = getFilename(path),
