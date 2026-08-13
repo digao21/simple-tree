@@ -7,6 +7,7 @@ CONTENTS                                                  *simple-tree-contents*
     2. Commands ................................... |simple-tree-commands|
     3. Lua API .................................... |simple-tree-api|
     4. Buffer & Window Characteristics ............ |simple-tree-window|
+    5. Tree Presentation & Filtering .............. |simple-tree-presentation|
 
 ==============================================================================
 1. INTRODUCTION                                              *simple-tree-intro*
@@ -61,6 +62,17 @@ Window Attributes:
     - winfixwidth = true (Width preservation)
     - Gutter suppressed (number=false, relativenumber=false, signcolumn="no",
       foldcolumn="0")
+
+==============================================================================
+5. TREE PRESENTATION & FILTERING                    *simple-tree-presentation*
+
+By default, the presentation layer filters out all filesystem nodes (both files
+and directories) whose names begin with a dot (`.`), such as `.git`, `.vscode`,
+`.gitignore`, or `.env`.
+
+When a directory is filtered, all of its descendant files and subdirectories
+are omitted from the tree output as well. Non-dot files and non-dot
+directories continue to be rendered with their appropriate indentation levels.
 
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:
