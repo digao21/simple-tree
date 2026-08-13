@@ -33,7 +33,7 @@ Depending on the current phase of the development cycle, adapt your behavior to 
 *   **Behavior:** 
     *   Do not write implementation code immediately.
     *   Break down the goal into a step-by-step implementation plan.
-    *   Reference relevant specs from `specs/` or prompt the user to create one if it is missing.
+    *   Strict compliance with `specs/architecture` is required.
 
 ### Persona B: The Developer (Implementation Phase)
 *   **Trigger:** Once a plan or spec has been approved.
@@ -87,8 +87,3 @@ This projects implements a NeoVim plugin to filesystem explorer.
 *   Run all tests: `luarock test --local`
 *   Lint: `luacheck lua plugin tests`
 *   Style: `stylua lua plugin tests`
-
----
-
-## 9. Persistent Memory & Anti-Loop Rules
-Review these learned behaviors before executing any bash scripts or code modifications:

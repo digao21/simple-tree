@@ -1,0 +1,66 @@
+*simple-tree.txt*       A lightweight, asynchronous filesystem tree explorer for Neovim
+
+==============================================================================
+CONTENTS                                                  *simple-tree-contents*
+
+    1. Introduction ............................... |simple-tree-intro|
+    2. Commands ................................... |simple-tree-commands|
+    3. Lua API .................................... |simple-tree-api|
+    4. Buffer & Window Characteristics ............ |simple-tree-window|
+
+==============================================================================
+1. INTRODUCTION                                              *simple-tree-intro*
+
+Simple Tree is a clean, non-blocking filesystem tree explorer designed for
+Neovim with a decoupled Hexagonal Architecture.
+
+==============================================================================
+2. COMMANDS                                               *simple-tree-commands*
+
+:SimpleTree open                                            *:SimpleTree-open*
+    Opens the SimpleTree sidebar window anchored to the far left. If the
+    window is already open, shifts input focus to it.
+
+:SimpleTree close                                           *:SimpleTree-close*
+    Closes the SimpleTree sidebar window if open. If already closed, completes
+    silently as a graceful no-op.
+
+:SimpleTree toggle                                         *:SimpleTree-toggle*
+    Toggles the SimpleTree sidebar window: closes it if open, or opens it if
+    closed.
+
+==============================================================================
+3. LUA API                                                     *simple-tree-api*
+
+require("simple-tree").setup(opts)                        *simple-tree.setup()*
+    Initializes the plugin.
+
+require("simple-tree").open(callback)                      *simple-tree.open()*
+    Opens or focuses the SimpleTree explorer window.
+
+require("simple-tree").close()                            *simple-tree.close()*
+    Closes the SimpleTree explorer window.
+
+require("simple-tree").toggle(callback)                  *simple-tree.toggle()*
+    Toggles the SimpleTree explorer window open or closed.
+
+==============================================================================
+4. BUFFER & WINDOW CHARACTERISTICS                       *simple-tree-window*
+
+Buffer Attributes:
+    - buflisted = false (Unlisted scratch buffer)
+    - buftype = "nofile" (Non-file type, never prompts to save)
+    - bufhidden = "wipe" (Wiped on window closure)
+    - swapfile = false (No swapfile)
+    - filetype = "simple-tree" (Dedicated syntax/ftplugin)
+    - modifiable = false (Read-only protection)
+
+Window Attributes:
+    - Anchored far left as a vertical split (split = "left")
+    - winfixbuf = true (Buffer pinning)
+    - winfixwidth = true (Width preservation)
+    - Gutter suppressed (number=false, relativenumber=false, signcolumn="no",
+      foldcolumn="0")
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:

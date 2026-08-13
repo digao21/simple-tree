@@ -1,19 +1,28 @@
 local M = {}
 
----@param prefix string
 ---@param node Node
-local function _printNode(prefix, node)
-	vim.print(prefix .. node.name)
+---@param prefix string
+---@param lines string[]
+local function renderNode(node, prefix, lines)
+	table.insert(lines, prefix .. node.name)
 	if node.childs then
 		for _, child in ipairs(node.childs) do
-			_printNode(prefix .. "  ", child)
+			renderNode(child, prefix .. "  ", lines)
 		end
 	end
 end
 
----@param root Node
-M.printFilesystem = function(root)
-	_printNode("", root)
+--- Transforms the in-memory tree state into a list of display strings.
+---@param root Node|nil
+---@return string[]
+M.renderTree = function(root)
+	if not root then
+		return {}
+	end
+
+	local lines = {}
+	renderNode(root, "", lines)
+	return lines
 end
 
 return M
