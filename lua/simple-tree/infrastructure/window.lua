@@ -6,6 +6,9 @@ local current_win = nil
 ---@type number|nil
 local current_buf = nil
 
+---@type table<number, number>
+local current_line_to_id = {}
+
 local DEFAULT_WIDTH = 30
 
 --- Checks if the SimpleTree window is currently open and valid.
@@ -32,6 +35,12 @@ M.getBuf = function()
 	return nil
 end
 
+--- Returns the current line-to-ID mapping.
+---@return table<number, number>
+M.getLineToId = function()
+	return current_line_to_id
+end
+
 --- Focuses the SimpleTree window if currently open.
 M.focus = function()
 	if M.isOpen() and current_win then
@@ -39,16 +48,38 @@ M.focus = function()
 	end
 end
 
---- Opens the explorer split window or focuses it if already open.
+--- Handles the folder toggle keymap event.
+local function onToggleKey()
+	local cursor = vim.api.nvim_win_get_cursor(0)
+	local line_num = cursor[1]
+	local node_id = current_line_to_id[line_num]
+	if node_id then
+		local cmd = require("simple-tree.command")
+		cmd.toggleFolder(node_id)
+	end
+end
+
+--- Opens the explorer split window or refreshes it if already open.
 ---@param lines string[]|nil
+---@param line_to_id table<number, number>|nil
 ---@return number window ID
-M.open = function(lines)
+M.open = function(lines, line_to_id)
+	if line_to_id then
+		current_line_to_id = line_to_id
+	end
+
 	if M.isOpen() and current_win and current_buf then
 		M.focus()
 		if lines then
+			local cursor = vim.api.nvim_win_get_cursor(current_win)
 			vim.api.nvim_set_option_value("modifiable", true, { buf = current_buf })
 			vim.api.nvim_buf_set_lines(current_buf, 0, -1, false, lines)
 			vim.api.nvim_set_option_value("modifiable", false, { buf = current_buf })
+
+			-- Preserve and clamp cursor position
+			local total_lines = #lines
+			local row = math.min(cursor[1], math.max(1, total_lines))
+			vim.api.nvim_win_set_cursor(current_win, { row, cursor[2] })
 		end
 		return current_win
 	end
@@ -66,6 +97,10 @@ M.open = function(lines)
 		vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
 	end
 	vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
+
+	-- Register buffer-local keybindings
+	vim.keymap.set("n", "<CR>", onToggleKey, { buffer = buf, silent = true, nowait = true })
+	vim.keymap.set("n", "<Space>", onToggleKey, { buffer = buf, silent = true, nowait = true })
 
 	-- Open vertical split window anchored far left
 	local win = vim.api.nvim_open_win(buf, true, {
@@ -94,12 +129,14 @@ M.close = function()
 	if not M.isOpen() or not current_win then
 		current_win = nil
 		current_buf = nil
+		current_line_to_id = {}
 		return
 	end
 
 	local win_to_close = current_win
 	current_win = nil
 	current_buf = nil
+	current_line_to_id = {}
 
 	if vim.api.nvim_win_is_valid(win_to_close) then
 		vim.api.nvim_win_close(win_to_close, true)

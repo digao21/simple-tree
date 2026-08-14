@@ -53,7 +53,8 @@ end
 ---@param node Node
 ---@param prefix string
 ---@param lines string[]
-local function renderNode(node, prefix, lines)
+---@param line_to_id table<number, number>
+local function renderNode(node, prefix, lines, line_to_id)
 	local icon = getIcon(node)
 
 	local name = node.name
@@ -62,26 +63,32 @@ local function renderNode(node, prefix, lines)
 	end
 
 	table.insert(lines, prefix .. name)
-	if node.childs then
+	if node.id then
+		line_to_id[#lines] = node.id
+	end
+
+	-- Only render descendants when the directory node is expanded
+	if node.type == "directory" and node.expanded and node.childs then
 		for _, child in ipairs(node.childs) do
 			if not isHiddenNode(child) then
-				renderNode(child, prefix .. "  ", lines)
+				renderNode(child, prefix .. "  ", lines, line_to_id)
 			end
 		end
 	end
 end
 
---- Transforms the in-memory tree state into a list of display strings.
+--- Transforms the in-memory tree state into a list of display strings and a line-to-ID map.
 ---@param root Node|nil
----@return string[]
+---@return string[] lines, table<number, number> line_to_id
 M.renderTree = function(root)
 	if not root then
-		return {}
+		return {}, {}
 	end
 
 	local lines = {}
-	renderNode(root, "", lines)
-	return lines
+	local line_to_id = {}
+	renderNode(root, "", lines, line_to_id)
+	return lines, line_to_id
 end
 
 return M

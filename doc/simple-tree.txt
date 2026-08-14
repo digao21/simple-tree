@@ -8,6 +8,7 @@ CONTENTS                                                  *simple-tree-contents*
     3. Lua API .................................... |simple-tree-api|
     4. Buffer & Window Characteristics ............ |simple-tree-window|
     5. Tree Presentation & Filtering .............. |simple-tree-presentation|
+    6. Navigation & Keybindings ................... |simple-tree-navigation|
 
 ==============================================================================
 1. INTRODUCTION                                              *simple-tree-intro*
@@ -80,6 +81,18 @@ Folder & File Icons:
       FOLDER_ICON_OPEN ("").
     - Resolves icons using `mini.icons` (supporting directory and file
       categories), with fallback to `nvim-web-devicons` for files.
+
+==============================================================================
+6. NAVIGATION & KEYBINDINGS                           *simple-tree-navigation*
+
+Inside the `simple-tree` buffer, the following default keybindings are active:
+
+<CR>                                                    *simple-tree-<CR>*
+    Toggles the expansion state of the directory under the cursor (expands if
+    collapsed, collapses if expanded). No-op on file nodes.
+
+<Space>                                              *simple-tree-<Space>*
+    Same as <CR>, toggles directory expansion under the cursor.
 
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:
