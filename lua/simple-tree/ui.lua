@@ -50,6 +50,19 @@ local function isHiddenNode(node)
 	return node.name:sub(1, 1) == "."
 end
 
+--- Compares two nodes: folders first, then alphabetically (case-insensitive).
+---@param a Node
+---@param b Node
+---@return boolean
+local function sortNodes(a, b)
+	local a_is_dir = a.type == "directory"
+	local b_is_dir = b.type == "directory"
+	if a_is_dir ~= b_is_dir then
+		return a_is_dir
+	end
+	return a.name:lower() < b.name:lower()
+end
+
 ---@param node Node
 ---@param prefix string
 ---@param lines string[]
@@ -69,10 +82,17 @@ local function renderNode(node, prefix, lines, line_to_id)
 
 	-- Only render descendants when the directory node is expanded
 	if node.type == "directory" and node.expanded and node.childs then
+		local visible_childs = {}
 		for _, child in ipairs(node.childs) do
 			if not isHiddenNode(child) then
-				renderNode(child, prefix .. "  ", lines, line_to_id)
+				table.insert(visible_childs, child)
 			end
+		end
+
+		table.sort(visible_childs, sortNodes)
+
+		for _, child in ipairs(visible_childs) do
+			renderNode(child, prefix .. "  ", lines, line_to_id)
 		end
 	end
 end

@@ -1,14 +1,14 @@
 # Feature Specification: Filesystem Tree Presentation & Filtering
 
 **Status:** Approved  
-**Feature:** SimpleTree Presentation Filtering  
+**Feature:** SimpleTree Presentation Filtering & Sorting  
 **Target:** Presentational transformation of in-memory filesystem tree
 
 ---
 
 ## 1. Feature Summary & Objective
 
-Provide presentation-level filtering of filesystem nodes when rendering the tree in the SimpleTree window. All files and directories beginning with a dot (`.`) are filtered out from the rendered display, preventing internal meta-files and meta-directories (e.g., `.git`, `.gitignore`, `.env`, `.cache`) from cluttering the explorer view.
+Provide presentation-level filtering and structured ordering of filesystem nodes when rendering the tree in the SimpleTree window. All files and directories beginning with a dot (`.`) are filtered out from the rendered display. Within each directory level, folders are sorted and displayed before files, with alphabetical ordering within each group.
 
 ---
 
@@ -29,6 +29,11 @@ Provide presentation-level filtering of filesystem nodes when rendering the tree
   - Falls back to `nvim-web-devicons` for file icons if `mini.icons` is absent.
   - Falls back gracefully to default folder icons and empty file icon strings if no third-party icon libraries are installed.
 
+### 2.3 Folders-First Ordering & Sorting
+* **Folders Precedence:** At every directory level, all directory nodes (`type == "directory"`) must appear before file nodes (`type ~= "directory"`).
+* **Alphabetical Ordering:** Within the directories group and files group respectively, items are sorted alphabetically in a case-insensitive manner (`a.name:lower() < b.name:lower()`).
+* **Immutability:** Sorting must not mutate the internal domain tree structure in `filesystem.lua`.
+
 ---
 
 ## 3. Acceptance Criteria (Definition of Done)
@@ -47,3 +52,8 @@ Provide presentation-level filtering of filesystem nodes when rendering the tree
 * **Given** a directory containing regular directories and regular files alongside dot-prefixed nodes,
 * **When** `ui.renderTree(root)` is executed,
 * **Then** only the non-dot directories and files are rendered with appropriate indentation levels.
+
+### AC-4: Folders-First & Alphabetical Sorting
+* **Given** a directory containing a mix of unsorted files and folders (e.g., `main.lua`, `src/`, `README.md`, `assets/`, `config.lua`),
+* **When** `ui.renderTree(root)` is executed,
+* **Then** folders appear first in alphabetical order (`assets/`, `src/`), followed by files in alphabetical order (`config.lua`, `main.lua`, `README.md`).

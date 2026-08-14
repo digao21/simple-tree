@@ -187,7 +187,7 @@ describe("ui.renderTree", function()
 		assert.are.same({ [1] = 1, [2] = 4 }, line_to_id)
 	end)
 
-	it("filters out files starting with a dot (AC-2, AC-3)", function()
+	it("filters out files starting with a dot and sorts folders before files (AC-2, AC-3, AC-4)", function()
 		local root = {
 			id = 1,
 			type = "directory",
@@ -228,15 +228,53 @@ describe("ui.renderTree", function()
 		local lines, line_to_id = ui.renderTree(root)
 		assert.are.same({
 			" project",
-			"  main.lua",
 			"   docs",
 			"    README.md",
+			"  main.lua",
 		}, lines)
 		assert.are.same({
 			[1] = 1,
-			[2] = 3,
-			[3] = 4,
-			[4] = 5,
+			[2] = 4,
+			[3] = 5,
+			[4] = 3,
+		}, line_to_id)
+	end)
+
+	it("sorts folders before files and sorts alphabetically within groups (AC-4)", function()
+		local root = {
+			id = 1,
+			type = "directory",
+			name = "workspace",
+			path = "/workspace",
+			expanded = true,
+			childs = {
+				{ id = 2, type = "file", name = "main.lua", path = "/workspace/main.lua" },
+				{ id = 3, type = "directory", name = "src", path = "/workspace/src", expanded = false },
+				{ id = 4, type = "file", name = "README.md", path = "/workspace/README.md" },
+				{ id = 5, type = "directory", name = "assets", path = "/workspace/assets", expanded = false },
+				{ id = 6, type = "file", name = "config.lua", path = "/workspace/config.lua" },
+				{ id = 7, type = "directory", name = "bin", path = "/workspace/bin", expanded = false },
+			},
+		}
+
+		local lines, line_to_id = ui.renderTree(root)
+		assert.are.same({
+			" workspace",
+			"   assets",
+			"   bin",
+			"   src",
+			"  config.lua",
+			"  main.lua",
+			"  README.md",
+		}, lines)
+		assert.are.same({
+			[1] = 1,
+			[2] = 5,
+			[3] = 7,
+			[4] = 3,
+			[5] = 6,
+			[6] = 2,
+			[7] = 4,
 		}, line_to_id)
 	end)
 end)

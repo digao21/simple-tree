@@ -75,6 +75,11 @@ When a directory is filtered, all of its descendant files and subdirectories
 are omitted from the tree output as well. Non-dot files and non-dot
 directories continue to be rendered with their appropriate indentation levels.
 
+Node Sorting:
+    - Folders are always rendered before files at every hierarchy level.
+    - Within directory and file groups respectively, items are sorted
+      alphabetically in a case-insensitive order.
+
 Folder & File Icons:
     - Collapsed/closed directory nodes display FOLDER_ICON_CLOSED ("").
     - Expanded directory nodes (node.expanded = true) display
