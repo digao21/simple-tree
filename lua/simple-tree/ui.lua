@@ -1,5 +1,48 @@
 local M = {}
 
+local FOLDER_ICON_CLOSED = ""
+local FOLDER_ICON_OPEN = ""
+
+M.FOLDER_ICON_CLOSED = FOLDER_ICON_CLOSED
+M.FOLDER_ICON_CLOSE = FOLDER_ICON_CLOSED
+M.FOLDER_ICON_OPEN = FOLDER_ICON_OPEN
+
+local mini_icons_loaded, mini_icons = pcall(require, "mini.icons")
+local devicons_loaded, devicons = pcall(require, "nvim-web-devicons")
+
+--- Resolves the display icon for a given filesystem node.
+---@param node Node
+---@return string
+local function getIcon(node)
+	if node.type == "directory" then
+		if node.expanded then
+			return FOLDER_ICON_OPEN
+		end
+
+		if mini_icons_loaded and mini_icons then
+			local icon = mini_icons.get("directory", node.name)
+			if icon and icon ~= "" then
+				return icon
+			end
+		end
+
+		return FOLDER_ICON_CLOSED
+	end
+
+	if mini_icons_loaded and mini_icons then
+		local icon = mini_icons.get("file", node.name)
+		if icon and icon ~= "" then
+			return icon
+		end
+	end
+
+	if devicons_loaded and devicons then
+		return devicons.get_icon(node.name) or ""
+	end
+
+	return ""
+end
+
 --- Checks whether a node is hidden (name starts with a dot).
 ---@param node Node
 ---@return boolean
@@ -11,7 +54,14 @@ end
 ---@param prefix string
 ---@param lines string[]
 local function renderNode(node, prefix, lines)
-	table.insert(lines, prefix .. node.name)
+	local icon = getIcon(node)
+
+	local name = node.name
+	if icon and icon ~= "" then
+		name = icon .. " " .. name
+	end
+
+	table.insert(lines, prefix .. name)
 	if node.childs then
 		for _, child in ipairs(node.childs) do
 			if not isHiddenNode(child) then

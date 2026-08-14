@@ -1,12 +1,18 @@
 local ui = require("simple-tree.ui")
 
 describe("ui.renderTree", function()
+	it("exposes folder icon constants and aliases", function()
+		assert.equals("", ui.FOLDER_ICON_CLOSED)
+		assert.equals("", ui.FOLDER_ICON_CLOSE)
+		assert.equals("", ui.FOLDER_ICON_OPEN)
+	end)
+
 	it("returns empty list when root is nil", function()
 		local lines = ui.renderTree(nil)
 		assert.are.same({}, lines)
 	end)
 
-	it("renders a single root node with no children", function()
+	it("renders a single root node with default closed folder icon", function()
 		local root = {
 			type = "directory",
 			name = "my_project",
@@ -14,10 +20,32 @@ describe("ui.renderTree", function()
 		}
 
 		local lines = ui.renderTree(root)
-		assert.are.same({ "my_project" }, lines)
+		assert.are.same({ " my_project" }, lines)
 	end)
 
-	it("renders a root node with children using 2-space indentation", function()
+	it("renders an expanded root folder with FOLDER_ICON_OPEN", function()
+		local root = {
+			type = "directory",
+			name = "my_project",
+			path = "/path/to/my_project",
+			expanded = true,
+			childs = {
+				{
+					type = "file",
+					name = "init.lua",
+					path = "/path/to/my_project/init.lua",
+				},
+			},
+		}
+
+		local lines = ui.renderTree(root)
+		assert.are.same({
+			" my_project",
+			"  init.lua",
+		}, lines)
+	end)
+
+	it("renders a root node with children using 2-space indentation and folder icons", function()
 		local root = {
 			type = "directory",
 			name = "my_project",
@@ -38,13 +66,13 @@ describe("ui.renderTree", function()
 
 		local lines = ui.renderTree(root)
 		assert.are.same({
-			"my_project",
+			" my_project",
 			"  init.lua",
 			"  README.md",
 		}, lines)
 	end)
 
-	it("renders deeply nested hierarchies with proper level indentation", function()
+	it("renders deeply nested hierarchies with proper level indentation and mixed expansion states", function()
 		local root = {
 			type = "directory",
 			name = "root",
@@ -54,11 +82,13 @@ describe("ui.renderTree", function()
 					type = "directory",
 					name = "src",
 					path = "/root/src",
+					expanded = true,
 					childs = {
 						{
 							type = "directory",
 							name = "core",
 							path = "/root/src/core",
+							expanded = false,
 							childs = {
 								{
 									type = "file",
@@ -84,9 +114,9 @@ describe("ui.renderTree", function()
 
 		local lines = ui.renderTree(root)
 		assert.are.same({
-			"root",
-			"  src",
-			"    core",
+			" root",
+			"   src",
+			"     core",
 			"      engine.lua",
 			"    main.lua",
 			"  package.json",
@@ -146,8 +176,8 @@ describe("ui.renderTree", function()
 
 		local lines = ui.renderTree(root)
 		assert.are.same({
-			"workspace",
-			"  src",
+			" workspace",
+			"   src",
 			"    index.lua",
 		}, lines)
 	end)
@@ -202,9 +232,9 @@ describe("ui.renderTree", function()
 
 		local lines = ui.renderTree(root)
 		assert.are.same({
-			"project",
+			" project",
 			"  main.lua",
-			"  docs",
+			"   docs",
 			"    README.md",
 		}, lines)
 	end)

@@ -20,6 +20,15 @@ Provide presentation-level filtering of filesystem nodes when rendering the tree
 * **Standard Node Preservation:** Non-dot files and non-dot directories must continue to be displayed with correct hierarchy and indentation.
 * **Domain Model Independence:** The filtering occurs during the presentation transformation in `ui.lua`; the underlying in-memory state store (`filesystem.lua`) retains the full, unfiltered tree structure.
 
+### 2.2 Folder & File Icon Presentation
+* **Folder State Icons:**
+  - Collapsed/closed directory nodes display `FOLDER_ICON_CLOSED` (``) by default.
+  - Expanded directory nodes (`node.expanded == true`) display `FOLDER_ICON_OPEN` (``).
+* **Icon Providers:**
+  - Queries `mini.icons` for directory-specific or file-specific icons if available.
+  - Falls back to `nvim-web-devicons` for file icons if `mini.icons` is absent.
+  - Falls back gracefully to default folder icons and empty file icon strings if no third-party icon libraries are installed.
+
 ---
 
 ## 3. Acceptance Criteria (Definition of Done)

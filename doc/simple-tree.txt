@@ -74,5 +74,12 @@ When a directory is filtered, all of its descendant files and subdirectories
 are omitted from the tree output as well. Non-dot files and non-dot
 directories continue to be rendered with their appropriate indentation levels.
 
+Folder & File Icons:
+    - Collapsed/closed directory nodes display FOLDER_ICON_CLOSED ("").
+    - Expanded directory nodes (node.expanded = true) display
+      FOLDER_ICON_OPEN ("").
+    - Resolves icons using `mini.icons` (supporting directory and file
+      categories), with fallback to `nvim-web-devicons` for files.
+
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:
