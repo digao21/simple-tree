@@ -59,8 +59,11 @@ describe("command module", function()
     }
 
     filesystem.setRoot(root)
-    local initial_lines = { " root", "   src" }
-    window.open(initial_lines, { [1] = 1, [2] = 2 })
+    local initial_items = {
+      { line = " root", id = 1 },
+      { line = "   src", id = 2 },
+    }
+    window.open(initial_items)
     assert.is_true(window.isOpen())
 
     local buf = window.getBuf()

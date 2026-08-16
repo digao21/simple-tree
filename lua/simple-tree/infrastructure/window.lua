@@ -11,6 +11,25 @@ local current_line_to_id = {}
 
 local DEFAULT_WIDTH = 30
 
+local ns_id = vim.api.nvim_create_namespace("simple_tree_highlights")
+
+--- Initializes default SimpleTree highlight groups linked to standard Neovim groups.
+local function setupHighlights()
+  vim.api.nvim_set_hl(0, "SimpleTreeDirectory", { default = true, link = "Directory" })
+  vim.api.nvim_set_hl(0, "SimpleTreeFile", { default = true, link = "Normal" })
+  vim.api.nvim_set_hl(0, "SimpleTreeFolderIcon", { default = true, link = "Directory" })
+  vim.api.nvim_set_hl(0, "SimpleTreeIcon", { default = true, link = "Normal" })
+end
+
+setupHighlights()
+
+--- Returns the namespace ID used for SimpleTree highlights.
+---@return number
+M.getNamespace = function() return ns_id end
+
+--- Re-initializes SimpleTree default highlight groups.
+M.setupHighlights = setupHighlights
+
 --- Checks if the SimpleTree window is currently open and valid.
 ---@return boolean
 M.isOpen = function() return current_win ~= nil and vim.api.nvim_win_is_valid(current_win) end
@@ -49,20 +68,50 @@ local function onToggleKey()
   end
 end
 
+--- Applies extmarks defined on items to the given buffer.
+---@param buf number
+---@param items { line: string, id: number|nil, extmarks?: { col_start?: number, col_end?: number, highlight?: string, start_col?: number, end_col?: number, hl_group?: string }[] }[]
+local function applyExtmarks(buf, items)
+  vim.api.nvim_buf_clear_namespace(buf, ns_id, 0, -1)
+  for line_idx, item in ipairs(items) do
+    if item.extmarks then
+      for _, mark in ipairs(item.extmarks) do
+        local col_start = mark.col_start or mark.start_col or 0
+        local col_end = mark.col_end or mark.end_col
+        local hl_group = mark.highlight or mark.hl_group
+        if col_end and hl_group then
+          vim.api.nvim_buf_set_extmark(buf, ns_id, line_idx - 1, col_start, {
+            end_col = col_end,
+            hl_group = hl_group,
+          })
+        end
+      end
+    end
+  end
+end
+
 --- Opens the explorer split window or refreshes it if already open.
----@param lines string[]|nil
----@param line_to_id table<number, number>|nil
+---@param items { line: string, id: number|nil, extmarks?: { col_start?: number, col_end?: number, highlight?: string }[] }[]|nil
 ---@return number window ID
-M.open = function(lines, line_to_id)
-  if line_to_id then current_line_to_id = line_to_id end
+M.open = function(items)
+  local lines = {}
+  if items then
+    current_line_to_id = {}
+    for i, item in ipairs(items) do
+      lines[i] = item.line
+      if item.id ~= nil then current_line_to_id[i] = item.id end
+    end
+  end
 
   if M.isOpen() and current_win and current_buf then
     M.focus()
-    if lines then
+    if items then
       local cursor = vim.api.nvim_win_get_cursor(current_win)
       vim.api.nvim_set_option_value("modifiable", true, { buf = current_buf })
       vim.api.nvim_buf_set_lines(current_buf, 0, -1, false, lines)
       vim.api.nvim_set_option_value("modifiable", false, { buf = current_buf })
+
+      applyExtmarks(current_buf, items)
 
       -- Preserve and clamp cursor position
       local total_lines = #lines
@@ -81,8 +130,10 @@ M.open = function(lines, line_to_id)
   vim.api.nvim_set_option_value("filetype", "simple-tree", { buf = buf })
 
   -- Populate buffer lines before making it unmodifiable
-  if lines and #lines > 0 then vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines) end
+  if #lines > 0 then vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines) end
   vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
+
+  if items and #items > 0 then applyExtmarks(buf, items) end
 
   -- Register buffer-local keybindings
   vim.keymap.set("n", "<CR>", onToggleKey, { buffer = buf, silent = true, nowait = true })

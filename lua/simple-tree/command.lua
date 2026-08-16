@@ -18,8 +18,8 @@ M.open = function(callback)
   local cwd = fs.get_cwd()
   fs.read_dir_async(cwd, function(root, _errors)
     filesystem.setRoot(root)
-    local lines, line_to_id = ui.renderTree(filesystem.getRoot())
-    window.open(lines, line_to_id)
+    local items = ui.renderTree(filesystem.getRoot())
+    window.open(items)
     if callback then callback() end
   end)
 end
@@ -47,8 +47,8 @@ M.toggleFolder = function(node_id, callback)
   local toggled = filesystem.toggleFolder(node_id)
   if toggled then
     local root = filesystem.getRoot()
-    local lines, line_to_id = ui.renderTree(root)
-    window.open(lines, line_to_id)
+    local items = ui.renderTree(root)
+    window.open(items)
   end
 
   if callback then callback() end

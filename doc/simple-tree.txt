@@ -9,6 +9,7 @@ CONTENTS                                                  *simple-tree-contents*
     4. Buffer & Window Characteristics ............ |simple-tree-window|
     5. Tree Presentation & Filtering .............. |simple-tree-presentation|
     6. Navigation & Keybindings ................... |simple-tree-navigation|
+    7. Highlights & Styling ....................... |simple-tree-highlights|
 
 ==============================================================================
 1. INTRODUCTION                                              *simple-tree-intro*
@@ -98,6 +99,28 @@ Inside the `simple-tree` buffer, the following default keybindings are active:
 
 <Space>                                              *simple-tree-<Space>*
     Same as <CR>, toggles directory expansion under the cursor.
+
+==============================================================================
+7. HIGHLIGHTS & STYLING                                *simple-tree-highlights*
+
+Simple Tree decorates buffer lines using Neovim Extmarks within a dedicated
+namespace (`simple_tree_highlights`).
+
+Default Highlight Groups:
+
+SimpleTreeDirectory                                     *hl-SimpleTreeDirectory*
+    Highlight group for directory names. Linked by default to |hl-Directory|.
+
+SimpleTreeFile                                               *hl-SimpleTreeFile*
+    Highlight group for file names. Linked by default to |hl-Normal|.
+
+SimpleTreeFolderIcon                                   *hl-SimpleTreeFolderIcon*
+    Highlight group for folder icons ("", ""). Linked by default to
+    |hl-Directory|.
+
+SimpleTreeIcon                                               *hl-SimpleTreeIcon*
+    Highlight group for file and fallback icons. Linked by default to
+    |hl-Normal|.
 
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:

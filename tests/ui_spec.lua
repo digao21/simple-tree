@@ -7,13 +7,12 @@ describe("ui.renderTree", function()
     assert.equals("", ui.FOLDER_ICON_OPEN)
   end)
 
-  it("returns empty list and empty map when root is nil", function()
-    local lines, line_to_id = ui.renderTree(nil)
-    assert.are.same({}, lines)
-    assert.are.same({}, line_to_id)
+  it("returns empty list when root is nil", function()
+    local items = ui.renderTree(nil)
+    assert.are.same({}, items)
   end)
 
-  it("renders a single root node with default closed folder icon and line_to_id map", function()
+  it("renders a single root node with default closed folder icon, id, and extmarks", function()
     local root = {
       id = 1,
       type = "directory",
@@ -22,9 +21,17 @@ describe("ui.renderTree", function()
       expanded = false,
     }
 
-    local lines, line_to_id = ui.renderTree(root)
-    assert.are.same({ " my_project" }, lines)
-    assert.are.same({ [1] = 1 }, line_to_id)
+    local items = ui.renderTree(root)
+    assert.are.same({
+      {
+        line = " my_project",
+        id = 1,
+        extmarks = {
+          { col_start = 0, col_end = 3, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 4, col_end = 14, highlight = "SimpleTreeDirectory" },
+        },
+      },
+    }, items)
   end)
 
   it("renders an expanded root folder with FOLDER_ICON_OPEN and its children", function()
@@ -44,12 +51,24 @@ describe("ui.renderTree", function()
       },
     }
 
-    local lines, line_to_id = ui.renderTree(root)
+    local items = ui.renderTree(root)
     assert.are.same({
-      " my_project",
-      "  init.lua",
-    }, lines)
-    assert.are.same({ [1] = 1, [2] = 2 }, line_to_id)
+      {
+        line = " my_project",
+        id = 1,
+        extmarks = {
+          { col_start = 0, col_end = 3, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 4, col_end = 14, highlight = "SimpleTreeDirectory" },
+        },
+      },
+      {
+        line = "  init.lua",
+        id = 2,
+        extmarks = {
+          { col_start = 2, col_end = 10, highlight = "SimpleTreeFile" },
+        },
+      },
+    }, items)
   end)
 
   it("does not render children of collapsed directory nodes", function()
@@ -69,9 +88,17 @@ describe("ui.renderTree", function()
       },
     }
 
-    local lines, line_to_id = ui.renderTree(root)
-    assert.are.same({ " my_project" }, lines)
-    assert.are.same({ [1] = 1 }, line_to_id)
+    local items = ui.renderTree(root)
+    assert.are.same({
+      {
+        line = " my_project",
+        id = 1,
+        extmarks = {
+          { col_start = 0, col_end = 3, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 4, col_end = 14, highlight = "SimpleTreeDirectory" },
+        },
+      },
+    }, items)
   end)
 
   it("renders deeply nested hierarchies with proper level indentation and mixed expansion states", function()
@@ -121,21 +148,47 @@ describe("ui.renderTree", function()
       },
     }
 
-    local lines, line_to_id = ui.renderTree(root)
+    local items = ui.renderTree(root)
     assert.are.same({
-      " root",
-      "   src",
-      "     core",
-      "    main.lua",
-      "  package.json",
-    }, lines)
-    assert.are.same({
-      [1] = 1,
-      [2] = 2,
-      [3] = 3,
-      [4] = 5,
-      [5] = 6,
-    }, line_to_id)
+      {
+        line = " root",
+        id = 1,
+        extmarks = {
+          { col_start = 0, col_end = 3, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 4, col_end = 8, highlight = "SimpleTreeDirectory" },
+        },
+      },
+      {
+        line = "   src",
+        id = 2,
+        extmarks = {
+          { col_start = 2, col_end = 5, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 6, col_end = 9, highlight = "SimpleTreeDirectory" },
+        },
+      },
+      {
+        line = "     core",
+        id = 3,
+        extmarks = {
+          { col_start = 4, col_end = 7, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 8, col_end = 12, highlight = "SimpleTreeDirectory" },
+        },
+      },
+      {
+        line = "    main.lua",
+        id = 5,
+        extmarks = {
+          { col_start = 4, col_end = 12, highlight = "SimpleTreeFile" },
+        },
+      },
+      {
+        line = "  package.json",
+        id = 6,
+        extmarks = {
+          { col_start = 2, col_end = 14, highlight = "SimpleTreeFile" },
+        },
+      },
+    }, items)
   end)
 
   it("filters out directories that start with a dot (AC-1, AC-2)", function()
@@ -179,12 +232,25 @@ describe("ui.renderTree", function()
       },
     }
 
-    local lines, line_to_id = ui.renderTree(root)
+    local items = ui.renderTree(root)
     assert.are.same({
-      " workspace",
-      "   src",
-    }, lines)
-    assert.are.same({ [1] = 1, [2] = 4 }, line_to_id)
+      {
+        line = " workspace",
+        id = 1,
+        extmarks = {
+          { col_start = 0, col_end = 3, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 4, col_end = 13, highlight = "SimpleTreeDirectory" },
+        },
+      },
+      {
+        line = "   src",
+        id = 4,
+        extmarks = {
+          { col_start = 2, col_end = 5, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 6, col_end = 9, highlight = "SimpleTreeDirectory" },
+        },
+      },
+    }, items)
   end)
 
   it("filters out files starting with a dot and sorts folders before files (AC-2, AC-3, AC-4)", function()
@@ -225,19 +291,39 @@ describe("ui.renderTree", function()
       },
     }
 
-    local lines, line_to_id = ui.renderTree(root)
+    local items = ui.renderTree(root)
     assert.are.same({
-      " project",
-      "   docs",
-      "    README.md",
-      "  main.lua",
-    }, lines)
-    assert.are.same({
-      [1] = 1,
-      [2] = 4,
-      [3] = 5,
-      [4] = 3,
-    }, line_to_id)
+      {
+        line = " project",
+        id = 1,
+        extmarks = {
+          { col_start = 0, col_end = 3, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 4, col_end = 11, highlight = "SimpleTreeDirectory" },
+        },
+      },
+      {
+        line = "   docs",
+        id = 4,
+        extmarks = {
+          { col_start = 2, col_end = 5, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 6, col_end = 10, highlight = "SimpleTreeDirectory" },
+        },
+      },
+      {
+        line = "    README.md",
+        id = 5,
+        extmarks = {
+          { col_start = 4, col_end = 13, highlight = "SimpleTreeFile" },
+        },
+      },
+      {
+        line = "  main.lua",
+        id = 3,
+        extmarks = {
+          { col_start = 2, col_end = 10, highlight = "SimpleTreeFile" },
+        },
+      },
+    }, items)
   end)
 
   it("sorts folders before files and sorts alphabetically within groups (AC-4)", function()
@@ -257,24 +343,82 @@ describe("ui.renderTree", function()
       },
     }
 
-    local lines, line_to_id = ui.renderTree(root)
+    local items = ui.renderTree(root)
     assert.are.same({
-      " workspace",
-      "   assets",
-      "   bin",
-      "   src",
-      "  config.lua",
-      "  main.lua",
-      "  README.md",
-    }, lines)
+      {
+        line = " workspace",
+        id = 1,
+        extmarks = {
+          { col_start = 0, col_end = 3, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 4, col_end = 13, highlight = "SimpleTreeDirectory" },
+        },
+      },
+      {
+        line = "   assets",
+        id = 5,
+        extmarks = {
+          { col_start = 2, col_end = 5, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 6, col_end = 12, highlight = "SimpleTreeDirectory" },
+        },
+      },
+      {
+        line = "   bin",
+        id = 7,
+        extmarks = {
+          { col_start = 2, col_end = 5, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 6, col_end = 9, highlight = "SimpleTreeDirectory" },
+        },
+      },
+      {
+        line = "   src",
+        id = 3,
+        extmarks = {
+          { col_start = 2, col_end = 5, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 6, col_end = 9, highlight = "SimpleTreeDirectory" },
+        },
+      },
+      {
+        line = "  config.lua",
+        id = 6,
+        extmarks = {
+          { col_start = 2, col_end = 12, highlight = "SimpleTreeFile" },
+        },
+      },
+      {
+        line = "  main.lua",
+        id = 2,
+        extmarks = {
+          { col_start = 2, col_end = 10, highlight = "SimpleTreeFile" },
+        },
+      },
+      {
+        line = "  README.md",
+        id = 4,
+        extmarks = {
+          { col_start = 2, col_end = 11, highlight = "SimpleTreeFile" },
+        },
+      },
+    }, items)
+  end)
+
+  it("handles nodes without id by setting id to nil", function()
+    local root = {
+      type = "directory",
+      name = "root",
+      path = "/root",
+      expanded = false,
+    }
+
+    local items = ui.renderTree(root)
     assert.are.same({
-      [1] = 1,
-      [2] = 5,
-      [3] = 7,
-      [4] = 3,
-      [5] = 6,
-      [6] = 2,
-      [7] = 4,
-    }, line_to_id)
+      {
+        line = " root",
+        id = nil,
+        extmarks = {
+          { col_start = 0, col_end = 3, highlight = "SimpleTreeFolderIcon" },
+          { col_start = 4, col_end = 8, highlight = "SimpleTreeDirectory" },
+        },
+      },
+    }, items)
   end)
 end)

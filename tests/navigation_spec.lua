@@ -34,8 +34,8 @@ describe("navigation and folder toggling via keymaps", function()
     }
 
     filesystem.setRoot(root)
-    local lines, line_to_id = ui.renderTree(filesystem.getRoot())
-    local win = window.open(lines, line_to_id)
+    local items = ui.renderTree(filesystem.getRoot())
+    local win = window.open(items)
     local buf = window.getBuf()
 
     assert.is_true(window.isOpen())
@@ -92,8 +92,8 @@ describe("navigation and folder toggling via keymaps", function()
     }
 
     filesystem.setRoot(root)
-    local lines, line_to_id = ui.renderTree(filesystem.getRoot())
-    local win = window.open(lines, line_to_id)
+    local items = ui.renderTree(filesystem.getRoot())
+    local win = window.open(items)
     local buf = window.getBuf()
 
     -- Position cursor on line 2 ('src' folder)
@@ -132,8 +132,8 @@ describe("navigation and folder toggling via keymaps", function()
     }
 
     filesystem.setRoot(root)
-    local lines, line_to_id = ui.renderTree(filesystem.getRoot())
-    local win = window.open(lines, line_to_id)
+    local items = ui.renderTree(filesystem.getRoot())
+    local win = window.open(items)
     local buf = window.getBuf()
 
     -- Position cursor on line 2 ('README.md' file)
