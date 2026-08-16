@@ -13,7 +13,7 @@ The `simple-tree` system is architected around the **Ports and Adapters (Hexagon
 ### 1.1 Core Engineering Tenets
 
 1. **Strict Boundary Isolation:** Domain logic must have zero knowledge of Neovim API contracts. It operates strictly on plain Lua tables, strings, booleans, and functions.
-2. **Encapsulation & Immutability:** Internal state mutations are restricted to dedicated state managers (`filesystem.lua`). Exposed states must return deep copies via [`util.deepCopy`](file:///home/rodrigolm/git/simple-tree/lua/simple-tree/util.lua#L6-L26) to prevent external reference leaks.
+2. **Encapsulation & Immutability:** The `model` module is responsible for the plugin domain model and internal state control. Internal state mutations are restricted to `model/filesystem.lua`, and all external access to the domain model is performed through `model/init.lua`. Exposed states must return deep copies via [`util.deepCopy`](file:///home/rodrigolm/git/simple-tree/lua/simple-tree/util.lua#L6-L26) to prevent external reference leaks.
 3. **Fail-Fast & Deterministic Execution:** Side effects (file IO, buffer writes) are isolated inside infrastructure modules. Functions in domain modules must be deterministic and pure.
 4. **Asynchronous Non-Blocking IO:** Filesystem traversal is performed asynchronously over Neovim's `libuv` event loop (`vim.uv.fs_scandir`), guaranteeing zero UI main-thread blocking.
 
@@ -27,9 +27,11 @@ simple-tree/
 │   ├── simple-tree.lua                   # Plugin configuration setup entrypoint
 │   └── simple-tree/
 │       ├── command.lua                   # Pure domain command dispatcher & parser
-│       ├── filesystem.lua                # In-memory filesystem tree state store
+│       ├── model/                        # Plugin domain model & internal state control
+│       │   ├── init.lua                  # Model public facade / entrypoint
+│       │   └── filesystem.lua            # In-memory filesystem tree state store
 │       ├── ui.lua                        # Transforms internal state into a presentational model
-│       ├── util.lua                      # Utility funcionts
+│       ├── util.lua                      # Utility functions
 │       └── infrastructure/
 │           ├── filesystem.lua            # Async libuv OS directory scanner (Vim API boundary)
 │           └── window.lua                # Neovim window/buffer driver (Vim API boundary)
@@ -55,6 +57,6 @@ To preserve long-term maintainability and testability, the system enforces a str
 ## 4. Testing Strategy
 
 1. **Pure Unit Testing (Domain Layer):**
-   * Domain modules (`filesystem.lua`, `ui.lua`, `util.lua`, `command.lua`) are tested in isolation using Busted without instantiating Neovim windows or mocks.
+   * Domain modules (`model`, `ui.lua`, `util.lua`, `command.lua`) are tested in isolation using Busted without instantiating Neovim windows or mocks.
 2. **Integration Testing (Infrastructure Layer):**
    * Infrastructure adapters (`infrastructure/filesystem.lua`, `infrastructure/window.lua`) are tested within an embedded Neovim runtime (`nlua`), verifying actual buffer states, window flags, and async filesystem callbacks.

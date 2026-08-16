@@ -1,6 +1,6 @@
 local command = require("simple-tree.command")
 local window = require("simple-tree.infrastructure.window")
-local filesystem = require("simple-tree.filesystem")
+local model = require("simple-tree.model")
 
 describe("command module", function()
   before_each(function() window.close() end)
@@ -58,7 +58,7 @@ describe("command module", function()
       },
     }
 
-    filesystem.setRoot(root)
+    model.setRoot(root)
     local initial_items = {
       { line = " root", id = 1 },
       { line = "   src", id = 2 },

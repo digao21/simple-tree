@@ -39,7 +39,7 @@ The presentation transformation produces a structured list of items (`TreeItem[]
 * **Dot Prefix Rule:** Any filesystem node (file or directory) whose `name` begins with `.` (dot) must be excluded from the rendered presentation.
 * **Subtree Pruning:** When a directory is filtered out, all of its descendant child nodes and subdirectories are omitted from the rendered output.
 * **Standard Node Preservation:** Non-dot files and non-dot directories must continue to be displayed with correct hierarchy and indentation.
-* **Domain Model Independence:** The filtering occurs during the presentation transformation in `ui.lua`; the underlying in-memory state store (`filesystem.lua`) retains the full, unfiltered tree structure.
+* **Domain Model Independence:** The filtering occurs during the presentation transformation in `ui.lua`; the underlying in-memory state store (`model`) retains the full, unfiltered tree structure.
 
 ### 2.4 Folder & File Icon Presentation
 * **Folder State Icons:**
@@ -53,7 +53,7 @@ The presentation transformation produces a structured list of items (`TreeItem[]
 ### 2.5 Folders-First Ordering & Sorting
 * **Folders Precedence:** At every directory level, all directory nodes (`type == "directory"`) must appear before file nodes (`type ~= "directory"`).
 * **Alphabetical Ordering:** Within the directories group and files group respectively, items are sorted alphabetically in a case-insensitive manner (`a.name:lower() < b.name:lower()`).
-* **Immutability:** Sorting must not mutate the internal domain tree structure in `filesystem.lua`.
+* **Immutability:** Sorting must not mutate the internal domain tree structure in `model`.
 
 ---
 

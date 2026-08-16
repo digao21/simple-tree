@@ -1,6 +1,6 @@
 local fs = require("simple-tree.infrastructure.filesystem")
 local window = require("simple-tree.infrastructure.window")
-local filesystem = require("simple-tree.filesystem")
+local model = require("simple-tree.model")
 local ui = require("simple-tree.ui")
 
 local M = {}
@@ -17,8 +17,8 @@ M.open = function(callback)
 
   local cwd = fs.get_cwd()
   fs.read_dir_async(cwd, function(root, _errors)
-    filesystem.setRoot(root)
-    local items = ui.renderTree(filesystem.getRoot())
+    model.setRoot(root)
+    local items = ui.renderTree(model.getRoot())
     window.open(items)
     if callback then callback() end
   end)
@@ -44,9 +44,9 @@ end
 M.toggleFolder = function(node_id, callback)
   if not node_id then return end
 
-  local toggled = filesystem.toggleFolder(node_id)
+  local toggled = model.toggleFolder(node_id)
   if toggled then
-    local root = filesystem.getRoot()
+    local root = model.getRoot()
     local items = ui.renderTree(root)
     window.open(items)
   end

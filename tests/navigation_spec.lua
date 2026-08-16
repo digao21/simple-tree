@@ -1,4 +1,4 @@
-local filesystem = require("simple-tree.filesystem")
+local model = require("simple-tree.model")
 local ui = require("simple-tree.ui")
 local window = require("simple-tree.infrastructure.window")
 
@@ -33,8 +33,8 @@ describe("navigation and folder toggling via keymaps", function()
       },
     }
 
-    filesystem.setRoot(root)
-    local items = ui.renderTree(filesystem.getRoot())
+    model.setRoot(root)
+    local items = ui.renderTree(model.getRoot())
     local win = window.open(items)
     local buf = window.getBuf()
 
@@ -91,8 +91,8 @@ describe("navigation and folder toggling via keymaps", function()
       },
     }
 
-    filesystem.setRoot(root)
-    local items = ui.renderTree(filesystem.getRoot())
+    model.setRoot(root)
+    local items = ui.renderTree(model.getRoot())
     local win = window.open(items)
     local buf = window.getBuf()
 
@@ -131,8 +131,8 @@ describe("navigation and folder toggling via keymaps", function()
       },
     }
 
-    filesystem.setRoot(root)
-    local items = ui.renderTree(filesystem.getRoot())
+    model.setRoot(root)
+    local items = ui.renderTree(model.getRoot())
     local win = window.open(items)
     local buf = window.getBuf()
 

@@ -1,6 +1,6 @@
-local fs_store = require("simple-tree.filesystem")
+local fs_store = require("simple-tree.model")
 
-describe("filesystem state store", function()
+describe("filesystem domain model", function()
   it("stores and retrieves root node as a deep copy with assigned IDs", function()
     local initial_root = {
       type = "directory",
