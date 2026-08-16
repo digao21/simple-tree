@@ -5,7 +5,7 @@ local M = {}
 --- Configures the SimpleTree plugin.
 ---@param _opts table|nil
 M.setup = function(_opts)
-	-- Placeholder for configuration table initialization
+  -- Placeholder for configuration table initialization
 end
 
 M.open = cmd.open

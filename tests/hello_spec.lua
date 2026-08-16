@@ -1,5 +1,3 @@
 describe("Hello world", function()
-	it("Shold pass", function()
-		assert.is_true(true)
-	end)
+  it("Shold pass", function() assert.is_true(true) end)
 end)
