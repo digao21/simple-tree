@@ -40,10 +40,16 @@ describe("infrastructure.window", function()
     -- Verify window characteristics
     assert.is_true(vim.api.nvim_get_option_value("winfixbuf", { win = win }))
     assert.is_true(vim.api.nvim_get_option_value("winfixwidth", { win = win }))
+    assert.is_true(vim.api.nvim_get_option_value("cursorline", { win = win }))
     assert.is_false(vim.api.nvim_get_option_value("number", { win = win }))
     assert.is_false(vim.api.nvim_get_option_value("relativenumber", { win = win }))
     assert.equals("no", vim.api.nvim_get_option_value("signcolumn", { win = win }))
     assert.equals("0", vim.api.nvim_get_option_value("foldcolumn", { win = win }))
+  end)
+
+  it("AC-7: enables cursorline highlighting inside the simple-tree window", function()
+    local win = window.open({ { line = "root", id = 1 } })
+    assert.is_true(vim.api.nvim_get_option_value("cursorline", { win = win }))
   end)
 
   it("AC-2: shifts focus to existing window when already open", function()

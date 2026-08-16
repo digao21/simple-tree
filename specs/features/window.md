@@ -38,6 +38,7 @@ The plugin exposes the `:SimpleTree` command with three sub-commands:
 * **Sidebar Placement:** Opened as a vertical split anchored to the far left of the workspace.
 * **Buffer Pinning (`winfixbuf=true`):** Prevents standard buffer navigation commands (`:edit`, `:bnext`, `:bprevious`) from opening inside the explorer split.
 * **Width Preservation (`winfixwidth=true`):** Maintains fixed width when other splits open or close.
+* **Cursorline Highlighting (`cursorline=true`):** Highlights the entire screen line of the cursor to provide clear visual feedback during tree navigation.
 * **Gutter Suppression:** Line numbers, relative numbers, sign columns, and fold columns are disabled.
 
 ---
@@ -73,3 +74,8 @@ The plugin exposes the `:SimpleTree` command with three sub-commands:
 * **Given** the SimpleTree window is open,
 * **When** the user attempts to type in the buffer or run `:edit <file>`,
 * **Then** text edits are blocked by read-only protection, and buffer changes within the split window are rejected.
+
+### AC-7: Cursorline Highlighting
+* **Given** the SimpleTree window is open,
+* **When** window configuration options are queried,
+* **Then** `cursorline` is enabled (`cursorline=true`) on the window.

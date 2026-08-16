@@ -62,6 +62,7 @@ Window Attributes:
     - Anchored far left as a vertical split (split = "left")
     - winfixbuf = true (Buffer pinning)
     - winfixwidth = true (Width preservation)
+    - cursorline = true (Cursor line highlighting)
     - Gutter suppressed (number=false, relativenumber=false, signcolumn="no",
       foldcolumn="0")
 

@@ -83,6 +83,7 @@ local function applyExtmarks(buf, items)
           vim.api.nvim_buf_set_extmark(buf, ns_id, line_idx - 1, col_start, {
             end_col = col_end,
             hl_group = hl_group,
+            hl_mode = "combine",
           })
         end
       end
@@ -153,6 +154,7 @@ M.open = function(items)
   vim.api.nvim_set_option_value("relativenumber", false, { win = win })
   vim.api.nvim_set_option_value("signcolumn", "no", { win = win })
   vim.api.nvim_set_option_value("foldcolumn", "0", { win = win })
+  vim.api.nvim_set_option_value("cursorline", true, { win = win })
 
   current_win = win
   current_buf = buf
