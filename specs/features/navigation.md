@@ -1,14 +1,14 @@
 # Feature Specification: Tree Navigation & Directory Expansion
 
 **Status:** Approved  
-**Feature:** SimpleTree Navigation & Node Expansion  
-**Target:** Buffer keymaps and tree expansion lifecycle
+**Feature:** SimpleTree Navigation, Node Expansion & File Opening  
+**Target:** Buffer keymaps, tree expansion lifecycle, and editor window targeting
 
 ---
 
 ## 1. Feature Summary & Objective
 
-Provide buffer-local keymaps and domain actions to toggle (expand/collapse) directory nodes within the SimpleTree explorer window. Expanding a directory reveals its child files and subdirectories, while collapsing a directory hides its descendants, updating the visual tree state and folder icon representation.
+Provide buffer-local keymaps and domain actions to toggle (expand/collapse) directory nodes and open file nodes within the SimpleTree explorer window. Expanding a directory reveals its child files and subdirectories, while collapsing a directory hides its descendants. Activating a file node on `<CR>` opens the file in the editor window immediately to the right of the SimpleTree sidebar.
 
 ---
 
@@ -18,8 +18,8 @@ Inside the `simple-tree` filetype buffer, the following default buffer-local key
 
 | Keymap | Action | Target Node Type | Description |
 | :--- | :--- | :--- | :--- |
-| `<CR>` | Toggle Expansion | Directory | Expands the directory if collapsed; collapses it if expanded. |
-| `<Space>` | Toggle Expansion | Directory | Expands the directory if collapsed; collapses it if expanded. |
+| `<CR>` | Select Node | Directory / File | If directory: expands/collapses folder. If file: opens file in the window to the right. |
+| `<Space>` | Toggle Expansion | Directory | Expands the directory if collapsed; collapses it if expanded. No-op on files. |
 
 ---
 
@@ -38,8 +38,11 @@ Inside the `simple-tree` filetype buffer, the following default buffer-local key
   - Expanded directories display `FOLDER_ICON_OPEN` (``).
 * **Cursor Position Preservation:** The cursor remains on the toggled directory node line after the buffer content is refreshed.
 
-### 3.3 Non-Directory (File) Node Handling
-* Invoking toggle expansion actions on a file node (`type == "file"`) performs a graceful no-op without raising errors or altering buffer state.
+### 3.3 File Node Activation & Window Targeting
+* **Open in Right Window:** When `<CR>` is invoked on a file node (`type == "file"`), the plugin opens the target file path in the window immediately to the right of the SimpleTree sidebar.
+* **Split Creation Fallback:** If no window exists to the right of the SimpleTree window (e.g. SimpleTree is the only window), a new vertical split is created to the right (`rightbelow vsplit`), and the file is loaded into that split.
+* **Focus Transition:** Input focus shifts to the target window displaying the opened file.
+* **Non-destructive Space Keymap:** Pressing `<Space>` on a file node performs a graceful no-op without raising errors or altering buffer state.
 
 ---
 
@@ -55,12 +58,17 @@ Inside the `simple-tree` filetype buffer, the following default buffer-local key
 * **When** the user presses `<CR>` or `<Space>`,
 * **Then** the directory's `expanded` state is set to `false`, all of its descendant nodes are hidden from the buffer, its icon changes to `FOLDER_ICON_CLOSED` (``), and the cursor remains on the directory line.
 
-### AC-3: File Node Invocation (No-Op)
+### AC-3: Open File on Enter in Right Window
 * **Given** the cursor is positioned on a file node in the SimpleTree buffer,
-* **When** the user presses `<CR>` or `<Space>`,
-* **Then** no tree state changes occur, no buffer modification takes place, and no error is thrown.
+* **When** the user presses `<CR>`,
+* **Then** the file is opened in the window to the right of SimpleTree (or a new right vertical split is opened if none exists), and editor focus moves to the opened file window.
 
-### AC-4: Deeply Nested Hierarchy Expansion
+### AC-4: File Node Space Invocation (No-Op)
+* **Given** the cursor is positioned on a file node in the SimpleTree buffer,
+* **When** the user presses `<Space>`,
+* **Then** no tree state changes occur, no buffer modification takes place, no file is opened, and no error is thrown.
+
+### AC-5: Deeply Nested Hierarchy Expansion
 * **Given** a directory structure with multiple nested levels,
 * **When** expanding or collapsing intermediate directories via `<CR>` or `<Space>`,
 * **Then** child indentation and sibling nodes maintain their relative visual hierarchy without corruption.

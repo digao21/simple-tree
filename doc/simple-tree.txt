@@ -95,11 +95,16 @@ Folder & File Icons:
 Inside the `simple-tree` buffer, the following default keybindings are active:
 
 <CR>                                                    *simple-tree-<CR>*
-    Toggles the expansion state of the directory under the cursor (expands if
-    collapsed, collapses if expanded). No-op on file nodes.
+    Selects the node under the cursor:
+    - Directories: Toggles expansion state (expands if collapsed, collapses if
+      expanded).
+    - Files: Opens the file in the editor window immediately to the right of
+      the SimpleTree sidebar (creating a split to the right if none exists) and
+      moves focus to the opened file.
 
 <Space>                                              *simple-tree-<Space>*
-    Same as <CR>, toggles directory expansion under the cursor.
+    Toggles directory expansion under the cursor. Performs a graceful no-op on
+    file nodes.
 
 ==============================================================================
 7. HIGHLIGHTS & STYLING                                *simple-tree-highlights*

@@ -57,7 +57,18 @@ M.focus = function()
   if M.isOpen() and current_win then vim.api.nvim_set_current_win(current_win) end
 end
 
---- Handles the folder toggle keymap event.
+--- Handles the select node keymap event (<CR>).
+local function onSelectKey()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local line_num = cursor[1]
+  local node_id = current_line_to_id[line_num]
+  if node_id then
+    local cmd = require("simple-tree.command")
+    cmd.selectNode(node_id)
+  end
+end
+
+--- Handles the folder toggle keymap event (<Space>).
 local function onToggleKey()
   local cursor = vim.api.nvim_win_get_cursor(0)
   local line_num = cursor[1]
@@ -66,6 +77,26 @@ local function onToggleKey()
     local cmd = require("simple-tree.command")
     cmd.toggleFolder(node_id)
   end
+end
+
+--- Opens a file in the window to the right of the SimpleTree sidebar,
+--- creating a vertical split if no right window exists.
+---@param file_path string
+M.openFile = function(file_path)
+  if not file_path or file_path == "" then return end
+
+  if M.isOpen() and current_win then
+    vim.api.nvim_set_current_win(current_win)
+    vim.cmd("wincmd l")
+    if vim.api.nvim_get_current_win() == current_win then
+      vim.cmd("rightbelow vsplit")
+      local new_win = vim.api.nvim_get_current_win()
+      vim.api.nvim_set_option_value("winfixbuf", false, { win = new_win })
+      vim.api.nvim_set_option_value("winfixwidth", false, { win = new_win })
+    end
+  end
+
+  vim.cmd("edit " .. vim.fn.fnameescape(file_path))
 end
 
 --- Applies extmarks defined on items to the given buffer.
@@ -137,7 +168,7 @@ M.open = function(items)
   if items and #items > 0 then applyExtmarks(buf, items) end
 
   -- Register buffer-local keybindings
-  vim.keymap.set("n", "<CR>", onToggleKey, { buffer = buf, silent = true, nowait = true })
+  vim.keymap.set("n", "<CR>", onSelectKey, { buffer = buf, silent = true, nowait = true })
   vim.keymap.set("n", "<Space>", onToggleKey, { buffer = buf, silent = true, nowait = true })
 
   -- Open vertical split window anchored far left
@@ -173,11 +204,25 @@ M.close = function()
   end
 
   local win_to_close = current_win
+  local buf_to_wipe = current_buf
   current_win = nil
   current_buf = nil
   current_line_to_id = {}
 
-  if vim.api.nvim_win_is_valid(win_to_close) then vim.api.nvim_win_close(win_to_close, true) end
+  if vim.api.nvim_win_is_valid(win_to_close) then
+    local wins = vim.api.nvim_tabpage_list_wins(0)
+    if #wins == 1 and wins[1] == win_to_close then
+      vim.cmd("new")
+      local new_win = vim.api.nvim_get_current_win()
+      vim.api.nvim_set_option_value("winfixbuf", false, { win = new_win })
+      vim.api.nvim_set_option_value("winfixwidth", false, { win = new_win })
+    end
+    pcall(vim.api.nvim_win_close, win_to_close, true)
+  end
+
+  if buf_to_wipe and vim.api.nvim_buf_is_valid(buf_to_wipe) then
+    pcall(vim.api.nvim_buf_delete, buf_to_wipe, { force = true })
+  end
 end
 
 return M

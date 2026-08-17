@@ -200,4 +200,67 @@ describe("infrastructure.window", function()
     assert.equals(11, marks_refreshed[2][4].end_col)
     assert.equals("SimpleTreeDirectory", marks_refreshed[2][4].hl_group)
   end)
+
+  it("openFile opens file in right window when tree window is active", function()
+    local temp_file = vim.fn.tempname() .. "_win_test.lua"
+    local fh = io.open(temp_file, "w")
+    if fh then
+      fh:write("-- hello\n")
+      fh:close()
+    end
+
+    local tree_win = window.open({ { line = "root", id = 1 } })
+    assert.equals(tree_win, vim.api.nvim_get_current_win())
+
+    window.openFile(temp_file)
+
+    local active_win = vim.api.nvim_get_current_win()
+    assert.are_not.equal(tree_win, active_win)
+    assert.equals(temp_file, vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(active_win)))
+
+    os.remove(temp_file)
+    if vim.api.nvim_win_is_valid(active_win) then vim.api.nvim_win_close(active_win, true) end
+  end)
+
+  it("openFile reuses existing right window when available", function()
+    local temp_file1 = vim.fn.tempname() .. "_win1.lua"
+    local temp_file2 = vim.fn.tempname() .. "_win2.lua"
+    local fh1 = io.open(temp_file1, "w")
+    if fh1 then
+      fh1:write("-- 1\n")
+      fh1:close()
+    end
+    local fh2 = io.open(temp_file2, "w")
+    if fh2 then
+      fh2:write("-- 2\n")
+      fh2:close()
+    end
+
+    local tree_win = window.open({ { line = "root", id = 1 } })
+
+    -- Open first file, creating the right window
+    window.openFile(temp_file1)
+    local edit_win = vim.api.nvim_get_current_win()
+    assert.are_not.equal(tree_win, edit_win)
+
+    -- Focus tree and open second file
+    window.focus()
+    assert.equals(tree_win, vim.api.nvim_get_current_win())
+
+    window.openFile(temp_file2)
+    local second_active_win = vim.api.nvim_get_current_win()
+    assert.equals(edit_win, second_active_win)
+    assert.equals(temp_file2, vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(second_active_win)))
+
+    os.remove(temp_file1)
+    os.remove(temp_file2)
+    if vim.api.nvim_win_is_valid(edit_win) then vim.api.nvim_win_close(edit_win, true) end
+  end)
+
+  it("openFile gracefully handles nil and empty string paths", function()
+    assert.has_no_errors(function()
+      window.openFile(nil)
+      window.openFile("")
+    end)
+  end)
 end)

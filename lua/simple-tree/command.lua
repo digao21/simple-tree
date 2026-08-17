@@ -57,4 +57,22 @@ M.toggleFolder = function(node_id, callback)
   if callback then callback() end
 end
 
+--- Selects a node (expands/collapses if directory, opens file in right window if file).
+---@param node_id number
+---@param callback fun()|nil Optional completion callback
+M.selectNode = function(node_id, callback)
+  if not node_id then return end
+
+  local node = model.getNodeById(node_id)
+  if not node then return end
+
+  if node.type == "directory" then
+    model.toggleFolder(node_id)
+  elseif node.type == "file" then
+    window.openFile(node.path)
+  end
+
+  if callback then callback() end
+end
+
 return M

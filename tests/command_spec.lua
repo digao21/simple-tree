@@ -1,6 +1,7 @@
 local command = require("simple-tree.command")
 local window = require("simple-tree.infrastructure.window")
 local model = require("simple-tree.model")
+local ui = require("simple-tree.ui")
 
 describe("command module", function()
   before_each(function() window.close() end)
@@ -82,5 +83,80 @@ describe("command module", function()
     command.toggleFolder(2)
     local lines_collapsed = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
     assert.are.same({ " root", "   src" }, lines_collapsed)
+  end)
+
+  it("selectNode toggles directory when given directory node ID", function()
+    local root = {
+      type = "directory",
+      name = "root",
+      path = "/root",
+      childs = {
+        {
+          type = "directory",
+          name = "src",
+          path = "/root/src",
+          childs = {
+            {
+              type = "file",
+              name = "main.lua",
+              path = "/root/src/main.lua",
+            },
+          },
+        },
+      },
+    }
+
+    model.setRoot(root)
+    window.open(ui.renderTree(model.getRoot()))
+
+    local done = false
+    command.selectNode(2, function() done = true end)
+    assert.is_true(done)
+
+    local buf = window.getBuf()
+    assert.are.same({ " root", "   src", "    main.lua" }, vim.api.nvim_buf_get_lines(buf, 0, -1, false))
+  end)
+
+  it("selectNode opens file when given file node ID", function()
+    local temp_file = vim.fn.tempname() .. "_cmd_test.lua"
+    local fh = io.open(temp_file, "w")
+    if fh then
+      fh:write("-- test\n")
+      fh:close()
+    end
+
+    local root = {
+      type = "directory",
+      name = "root",
+      path = "/root",
+      childs = {
+        {
+          type = "file",
+          name = "cmd_test.lua",
+          path = temp_file,
+        },
+      },
+    }
+
+    model.setRoot(root)
+    local win = window.open(ui.renderTree(model.getRoot()))
+
+    local done = false
+    command.selectNode(2, function() done = true end)
+    assert.is_true(done)
+
+    local active_win = vim.api.nvim_get_current_win()
+    assert.are_not.equal(win, active_win)
+    assert.equals(temp_file, vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(active_win)))
+
+    os.remove(temp_file)
+    if vim.api.nvim_win_is_valid(active_win) then vim.api.nvim_win_close(active_win, true) end
+  end)
+
+  it("selectNode gracefully handles nil and nonexistent IDs", function()
+    assert.has_no_errors(function()
+      command.selectNode(nil)
+      command.selectNode(9999)
+    end)
   end)
 end)
