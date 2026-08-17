@@ -5,6 +5,14 @@ local ui = require("simple-tree.ui")
 
 local M = {}
 
+-- Synchronize window presentation whenever the domain model changes
+model.subscribe(function(root)
+  if window.isOpen() and root then
+    local items = ui.renderTree(root)
+    window.open(items)
+  end
+end)
+
 --- Opens the SimpleTree explorer window.
 --- If already open, shifts focus to the existing window.
 ---@param callback fun()|nil Optional completion callback
@@ -38,18 +46,13 @@ M.toggle = function(callback)
   end
 end
 
---- Toggles expansion of a folder node and re-renders the explorer window.
+--- Toggles expansion of a folder node.
 ---@param node_id number
 ---@param callback fun()|nil Optional completion callback
 M.toggleFolder = function(node_id, callback)
   if not node_id then return end
 
-  local toggled = model.toggleFolder(node_id)
-  if toggled then
-    local root = model.getRoot()
-    local items = ui.renderTree(root)
-    window.open(items)
-  end
+  model.toggleFolder(node_id)
 
   if callback then callback() end
 end
